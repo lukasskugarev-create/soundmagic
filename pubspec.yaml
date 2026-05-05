@@ -1,0 +1,27 @@
+name: soundmagic
+description: Record and explore nature sounds on a map.
+publish_to: 'none'
+version: 1.0.0+1
+
+environment:
+  sdk: '>=3.0.0 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_map: ^6.1.0
+  latlong2: ^0.9.0
+  record: ^5.1.0
+  just_audio: ^0.9.36
+  geolocator: ^11.0.0
+  path_provider: ^2.1.2
+  uuid: ^4.3.3
+  intl: ^0.19.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^3.0.0
+
+flutter:
+  uses-material-design: true

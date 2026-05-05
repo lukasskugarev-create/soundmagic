@@ -8,13 +8,21 @@ workflows:
     scripts:
       - name: Get Flutter packages
         script: flutter pub get
-      - name: Build iOS
+      - name: Flutter build
+        script: flutter build ios --release --no-codesign
+      - name: Xcode build no sign
         script: |
-          flutter build ios --release --no-codesign \
+          xcodebuild \
+            -workspace ios/Runner.xcworkspace \
+            -scheme Runner \
+            -configuration Release \
+            -sdk iphoneos \
+            -derivedDataPath build/ios \
             CODE_SIGNING_ALLOWED=NO \
             CODE_SIGNING_REQUIRED=NO \
             CODE_SIGN_IDENTITY="" \
-            DEVELOPMENT_TEAM=""
+            DEVELOPMENT_TEAM="" \
+            build
       - name: Create IPA
         script: |
           APP_PATH=$(find build/ios -name "Runner.app" -type d | head -1)

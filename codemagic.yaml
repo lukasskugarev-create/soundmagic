@@ -1,14 +1,25 @@
 workflows:
-  ios-no-sign:
-    name: iOS No Signing
+  ios-workflow:
+    name: iOS Workflow
     instance_type: mac_mini_m2
     environment:
       flutter: stable
       xcode: latest
     scripts:
-      - name: Get packages
+      - name: Get Flutter packages
         script: flutter pub get
+      - name: Disable code signing
+        script: |
+          sed -i '' 's/CODE_SIGNING_ALLOWED = YES/CODE_SIGNING_ALLOWED = NO/g' ios/Runner.xcodeproj/project.pbxproj
+          sed -i '' 's/CODE_SIGNING_REQUIRED = YES/CODE_SIGNING_REQUIRED = NO/g' ios/Runner.xcodeproj/project.pbxproj
+          sed -i '' 's/DEVELOPMENT_TEAM = [^;]*;/DEVELOPMENT_TEAM = "";/g' ios/Runner.xcodeproj/project.pbxproj
       - name: Build iOS
         script: flutter build ios --release --no-codesign
+      - name: Create IPA
+        script: |
+          APP_PATH=$(find build/ios -name "Runner.app" -type d | head -1)
+          mkdir -p Payload
+          cp -r "$APP_PATH" Payload/
+          zip -r app.ipa Payload/
     artifacts:
-      - build/ios/iphoneos/Runner.app
+      - app.ipa

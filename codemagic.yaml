@@ -8,25 +8,26 @@ workflows:
     scripts:
       - name: Get Flutter packages
         script: flutter pub get
-      - name: Append signing overrides to xcconfig
+      - name: Generate Flutter build files
+        script: flutter build ios --release --no-codesign || true
+      - name: Build with xcodebuild directly
         script: |
-          echo "" >> ios/Flutter/Release.xcconfig
-          echo "CODE_SIGNING_ALLOWED=NO" >> ios/Flutter/Release.xcconfig
-          echo "CODE_SIGNING_REQUIRED=NO" >> ios/Flutter/Release.xcconfig
-          echo "CODE_SIGN_IDENTITY=" >> ios/Flutter/Release.xcconfig
-          echo "DEVELOPMENT_TEAM=" >> ios/Flutter/Release.xcconfig
-          echo "" >> ios/Flutter/Debug.xcconfig
-          echo "CODE_SIGNING_ALLOWED=NO" >> ios/Flutter/Debug.xcconfig
-          echo "CODE_SIGNING_REQUIRED=NO" >> ios/Flutter/Debug.xcconfig
-          echo "CODE_SIGN_IDENTITY=" >> ios/Flutter/Debug.xcconfig
-          echo "DEVELOPMENT_TEAM=" >> ios/Flutter/Debug.xcconfig
-          cat ios/Flutter/Release.xcconfig
-      - name: Build iOS
-        script: flutter build ios --release --no-codesign
+          cd ios
+          xcodebuild \
+            -workspace Runner.xcworkspace \
+            -scheme Runner \
+            -configuration Release \
+            -sdk iphoneos \
+            DEVELOPMENT_TEAM="" \
+            CODE_SIGN_IDENTITY="" \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGNING_ALLOWED=NO \
+            -derivedDataPath ../build/ios_build \
+            build
       - name: Create IPA
         script: |
-          APP_PATH=$(find build/ios/iphoneos -name "*.app" | head -1)
-          echo "Found app at: $APP_PATH"
+          APP_PATH=$(find build/ios_build -name "Runner.app" -type d | head -1)
+          echo "App path: $APP_PATH"
           mkdir -p Payload
           cp -r "$APP_PATH" Payload/
           zip -r app.ipa Payload/

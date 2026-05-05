@@ -8,8 +8,11 @@ workflows:
     scripts:
       - name: Get Flutter packages
         script: flutter pub get
-      - name: Generate Flutter build files
-        script: flutter build ios --release --no-codesign || true
+      - name: Prepare Flutter kernel
+        script: |
+          flutter build ios --release --no-codesign 2>&1 | head -50 || true
+          # Ensure Flutter artifacts are generated
+          flutter build bundle
       - name: Build with xcodebuild directly
         script: |
           cd ios
@@ -22,6 +25,7 @@ workflows:
             CODE_SIGN_IDENTITY="" \
             CODE_SIGNING_REQUIRED=NO \
             CODE_SIGNING_ALLOWED=NO \
+            FLUTTER_BUILD_MODE=release \
             -derivedDataPath ../build/ios_build \
             build
       - name: Create IPA

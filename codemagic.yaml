@@ -21,3 +21,4 @@ workflows:
           zip -r SoundMagic.ipa Payload
     artifacts:
       - build/ios/ipa/SoundMagic.ipa
+

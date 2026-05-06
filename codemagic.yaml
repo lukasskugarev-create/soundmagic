@@ -1,0 +1,31 @@
+workflows:
+  ios-debug:
+    name: iOS Debug Build
+    max_build_duration: 60
+    environment:
+      flutter: stable
+      xcode: latest
+      cocoapods: default
+    scripts:
+      - name: Get Flutter packages
+        script: flutter pub get
+      - name: Pod install
+        script: |
+          cd ios && pod install
+      - name: Set Xcode project settings
+        script: |
+          sed -i '' 's/PRODUCT_BUNDLE_IDENTIFIER = .*/PRODUCT_BUNDLE_IDENTIFIER = com.soundmagic.app;/' ios/Runner.xcodeproj/project.pbxproj
+          sed -i '' 's/CODE_SIGN_IDENTITY = .*/CODE_SIGN_IDENTITY = "";/' ios/Runner.xcodeproj/project.pbxproj
+          sed -i '' 's/CODE_SIGNING_REQUIRED = .*/CODE_SIGNING_REQUIRED = NO;/' ios/Runner.xcodeproj/project.pbxproj
+          sed -i '' 's/CODE_SIGNING_ALLOWED = .*/CODE_SIGNING_ALLOWED = NO;/' ios/Runner.xcodeproj/project.pbxproj
+      - name: Flutter build iOS no codesign
+        script: |
+          flutter build ios --debug --no-codesign
+      - name: Package IPA
+        script: |
+          mkdir -p build/ios/ipa/Payload
+          cp -r build/ios/iphoneos/Runner.app build/ios/ipa/Payload/
+          cd build/ios/ipa
+          zip -r SoundMagic.ipa Payload
+    artifacts:
+      - build/ios/ipa/SoundMagic.ipa
